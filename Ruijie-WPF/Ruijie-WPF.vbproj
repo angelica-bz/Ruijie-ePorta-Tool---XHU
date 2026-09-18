@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}</ProjectGuid>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{F184B08F-C81C-45F6-A57F-5ABD9991F28F}</ProjectTypeGuids>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Ruijie</RootNamespace>
+    <AssemblyName>Ruijie ePorta Tool</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <MyType>Custom</MyType>
+    <Deterministic>true</Deterministic>
+    <OptionExplicit>On</OptionExplicit>
+    <OptionCompare>Binary</OptionCompare>
+    <OptionStrict>Off</OptionStrict>
+    <OptionInfer>On</OptionInfer>
+    <ApplicationIcon>Images\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>Ruijie ePorta Tool.xml</DocumentationFile>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036,42314</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DocumentationFile>Ruijie ePorta Tool.xml</DocumentationFile>
+    <NoWarn>41999,42016,42017,42018,42019,42020,42021,42022,42032,42036,42314</NoWarn>
+    <Prefer32Bit>false</Prefer32Bit>
+    <WarningLevel>4</WarningLevel>
+    <DefineConstants>RELEASE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Page Include="FormMain.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\PageStatus.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\PageConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\MyButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\MyCheckBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\MyHint.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+
+    <Page Include="Controls\MyIconButton.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+
+
+
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App.xaml.vb">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FormMain.xaml.vb">
+      <DependentUpon>FormMain.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Pages\PageStatus.xaml.vb">
+      <DependentUpon>PageStatus.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\PageConfig.xaml.vb">
+      <DependentUpon>PageConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MyButton.xaml.vb">
+      <DependentUpon>MyButton.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MyCard.vb" />
+    <Compile Include="Controls\MyCheckBox.xaml.vb">
+      <DependentUpon>MyCheckBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\MyTextButton.vb" />
+    <Compile Include="Controls\MyHint.xaml.vb">
+      <DependentUpon>MyHint.xaml</DependentUpon>
+    </Compile>
+
+    <Compile Include="Controls\MyIconButton.xaml.vb">
+      <DependentUpon>MyIconButton.xaml</DependentUpon>
+    </Compile>
+
+
+
+    <Compile Include="Controls\MyScrollViewer.vb" />
+    <Compile Include="Controls\MyScrollBar.vb" />
+    <Compile Include="Controls\MyDropShadow.vb" />
+
+    <Compile Include="Controls\Behaviors\Interfaces.vb" />
+    <Compile Include="Controls\ExtensionMethods.vb" />
+    <Compile Include="Modules\ModAccountForm.vb" />
+    <Compile Include="Modules\ModAnimation.vb" />
+    <Compile Include="Modules\ModAcceptTests.vb" />
+    <Compile Include="Modules\ModAuth.vb" />
+    <Compile Include="Modules\ModAuthentication.vb" />
+    <Compile Include="Modules\ModAuthTrace.vb" />
+    <Compile Include="Modules\ModBase.vb" />
+    <Compile Include="Modules\ModConfig.vb" />
+    <Compile Include="Modules\ModCredential.vb" />
+    <Compile Include="Modules\ModCrypto.vb" />
+    <Compile Include="Modules\ModE2ETests.vb" />
+    <Compile Include="Modules\ModJson.vb" />
+    <Compile Include="Modules\ModNetwork.vb" />
+    <Compile Include="Modules\ModPortalDiscover.vb" />
+    <Compile Include="Modules\ModPreflight.vb" />
+    <Compile Include="Modules\ModMonitor.vb" />
+    <Compile Include="Modules\Tests\ModAuthenticationTests.vb" />
+    <Compile Include="Modules\Tests\ModAuthTests.vb" />
+    <Compile Include="Modules\Tests\ModAuthTraceTests.vb" />
+    <Compile Include="Modules\Tests\ModBindAddressTests.vb" />
+    <Compile Include="Modules\Tests\ModConfigTests.vb" />
+    <Compile Include="Modules\Tests\ModCredentialTests.vb" />
+    <Compile Include="Modules\Tests\ModCryptoTests.vb" />
+    <Compile Include="Modules\Tests\ModFailureClassificationTests.vb" />
+    <Compile Include="Modules\Tests\ModNetworkMonitorTests.vb" />
+    <Compile Include="Modules\Tests\ModPageConfigTests.vb" />
+    <Compile Include="Modules\Tests\ModPortalDiscoverTests.vb" />
+    <Compile Include="Modules\Tests\ModRuntimeAuthenticationTests.vb" />
+    <Compile Include="Modules\Tests\ModTestFixtures.vb" />
+    <Compile Include="Modules\Tests\ModTestFramework.vb" />
+    <Compile Include="Modules\Tests\ModTestSuite.vb" />
+    <Compile Include="Modules\ModStartup.vb" />
+    <Compile Include="Modules\VersionHelper.vb" />
+    <Compile Include="My Project\AssemblyInfo.vb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\icon.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
+  <ItemGroup>
+    <Import Include="System" />
+    <Import Include="System.Collections" />
+    <Import Include="System.Collections.Generic" />
+    <Import Include="System.IO" />
+    <Import Include="System.Linq" />
+    <Import Include="System.Text" />
+    <Import Include="System.Threading" />
+    <Import Include="System.Windows" />
+    <Import Include="System.Windows.Controls" />
+    <Import Include="System.Windows.Data" />
+    <Import Include="System.Windows.Documents" />
+    <Import Include="System.Windows.Input" />
+    <Import Include="System.Windows.Media" />
+    <Import Include="System.Windows.Media.Effects" />
+    <Import Include="System.Windows.Media.Imaging" />
+    <Import Include="System.Windows.Shapes" />
+    <Import Include="System.Windows.Threading" />
+  </ItemGroup>
+</Project>

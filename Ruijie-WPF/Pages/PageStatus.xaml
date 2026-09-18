@@ -1,0 +1,68 @@
+<Page
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Ruijie"
+    x:Class="PageStatus"
+    Title="Status" Background="Transparent">
+    <local:MyScrollViewer Margin="8" Padding="0,0,4,0">
+        <StackPanel Margin="8,8,8,16">
+
+            <!-- 状态 Section -->
+            <local:MyCard Title="状态" Margin="0,0,0,8">
+                <StackPanel Margin="15,38,15,12">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <Ellipse x:Name="ShapeStatusDot" Width="10" Height="10" Fill="{StaticResource ColorBrushGray4}"
+                                 VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock x:Name="LabStatus" Text="未连接" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <TextBlock Text="校园网状态：" Foreground="{StaticResource ColorBrushGray2}" />
+                        <TextBlock x:Name="LabSchoolStatus" Text="未知" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="重试间隔：" Foreground="{StaticResource ColorBrushGray2}" />
+                        <TextBlock x:Name="LabInterval" Text="60 秒" />
+                    </StackPanel>
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 控制 Section -->
+            <local:MyCard Title="控制" Margin="0,0,0,8">
+                <StackPanel Orientation="Horizontal" Margin="15,38,15,12">
+                    <local:MyButton x:Name="BtnConnect" Text="连接" ColorType="Highlight" Padding="20,6" Margin="0,0,8,0" />
+                    <local:MyButton x:Name="BtnDisconnect" Text="断开" ColorType="Normal" Padding="20,6" />
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 设置 Section -->
+            <local:MyCard Title="设置" Margin="0,0,0,8">
+                <StackPanel Margin="15,38,15,12">
+                    <local:MyCheckBox x:Name="ChkAutoStart" Text="开机自启" Margin="0,0,0,8" />
+                    <local:MyCheckBox x:Name="ChkAutoReconnect" Text="断线自动重连" Margin="0,0,0,8" />
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="重试间隔（1-99 秒）：" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox x:Name="TxtInterval" Width="60" Text="60" />
+                        <local:MyButton x:Name="BtnApplyInterval" Text="应用" Padding="10,4" Margin="8,0,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 事件日志 Section -->
+            <local:MyCard Title="事件日志">
+                <StackPanel Margin="15,38,15,12">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <local:MyButton x:Name="BtnOpenLog" Text="打开日志" ColorType="Normal" Padding="10,4" Margin="0,0,8,0" />
+                        <local:MyButton x:Name="BtnClearLog" Text="清空日志" ColorType="Normal" Padding="10,4" />
+                    </StackPanel>
+                    <Border Background="{StaticResource ColorBrushGray8}" CornerRadius="3" BorderBrush="{StaticResource ColorBrushGray5}" BorderThickness="1">
+                        <local:MyScrollViewer MaxHeight="200" Padding="8">
+                            <TextBlock x:Name="LabLog" Text="" TextWrapping="Wrap" Foreground="{StaticResource ColorBrushGray2}"
+                                       FontSize="12" FontFamily="Consolas" />
+                        </local:MyScrollViewer>
+                    </Border>
+                </StackPanel>
+            </local:MyCard>
+
+        </StackPanel>
+    </local:MyScrollViewer>
+</Page>
