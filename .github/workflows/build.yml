@@ -57,7 +57,7 @@ jobs:
           }
           Write-Host "构建产物：$exe"
 
-      # 质量门禁：离线测试套件，不访问网络、不读写用户配置、不写生产日志，退出码即结论
+      # 质量门禁：离线测试套件，不访问网络、不读写用户配置、退出码即结论
       # （0 = 全部通过，1 = 存在失败，见 ModTestSuite / App.xaml.vb 的 --test 分支）。
       #
       # 刻意**不**在 CI 里跑 --diagnose 与 --preflight：
@@ -68,9 +68,60 @@ jobs:
         shell: pwsh
         run: |
           $exe = "Ruijie-WPF\bin\${{ matrix.configuration }}\Ruijie ePorta Tool.exe"
-          & $exe --test
-          $code = $LASTEXITCODE
+
+          # 本程序是 WPF 的 **GUI 子系统**（WinExe）程序，不能用 `& $exe --test` 取退出码：
+          # pwsh 对 GUI 子系统程序不会可靠等待、也不会填充 $LASTEXITCODE，于是
+          # `$LASTEXITCODE` 为空，判断分支恒真，Job 被自己的 Write-Error 误判为失败
+          # （首次真实 CI 运行 run 35414206509 就是这样红的，而测试其实 142/0 全通过）。
+          #
+          # 因此必须显式等待进程结束并读 Process.ExitCode：
+          #   -Wait      —— 等到进程真正退出（GUI 子系统程序不会自动阻塞住 pwsh）；
+          #   -PassThru  —— 拿到 Process 对象，其 ExitCode 才是 --test 的真实结论。
+          $log = Join-Path $env:RUNNER_TEMP "offline-test-${{ matrix.configuration }}.log"
+          if (Test-Path $log) { Remove-Item $log -Force }
+
+          $process = $null
+          try {
+            $process = Start-Process `
+              -FilePath $exe `
+              -ArgumentList "--test" `
+              -Wait `
+              -PassThru `
+              -RedirectStandardOutput $log `
+              -ErrorAction Stop
+          } catch {
+            Write-Error "无法启动被测程序（$exe）：$($_.Exception.Message)"
+            exit 4
+          }
+
+          $code = $process.ExitCode
+
+          # GUI 子系统程序的输出同样不会被 pwsh 捕获，必须回显，否则失败原因不可见
+          if (Test-Path $log) { Get-Content $log | Write-Host }
+
           Write-Host "--- --test 退出码：$code ---"
+
+          # 关键防线：拿不到退出码时**必须与「测试失败」区分开**。
+          # $null / "" 参与 -ne 0 比较结果恒为真，若直接落进下面的分支，
+          # 就会重复「测试其实全过、却被自己判红」的原故障 —— 正是要修掉的那个。
+          if ([string]::IsNullOrEmpty($code)) {
+            Write-Error "未能取得 --test 的退出码（进程启动失败或未真正退出），本次结果不可信"
+            exit 3
+          }
+
+          # 顺带写进 Job Summary，失败时不必翻完整日志
+          if ($env:GITHUB_STEP_SUMMARY) {
+            @(
+              "### 离线测试（${{ matrix.configuration }}）"
+              ""
+              "``--test`` 退出码：``$code`` （0 = 全部通过）"
+              ""
+              '```'
+              (Get-Content $log -Tail 4 | Out-String).Trim()
+              '```'
+            ) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
+
           if ($code -ne 0) {
             Write-Error "离线测试失败（${{ matrix.configuration }}，退出码 $code）"
             exit $code
