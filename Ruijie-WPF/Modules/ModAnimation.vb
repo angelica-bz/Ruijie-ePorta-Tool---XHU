@@ -10,6 +10,13 @@ Public Module ModAnimation
 #Region "声明"
 
     Public AniGroups As New ConcurrentDictionary(Of String, AniGroupEntry)
+
+    ''' <summary>
+    ''' 动画线程的空闲唤醒信号：登记了新动画组就 Set，让空闲等待的线程立刻开工。
+    ''' 没有它的话，空闲线程要么忙等耗 CPU，要么得等超时才响应新动画。
+    ''' </summary>
+    Private ReadOnly AniWake As New System.Threading.ManualResetEventSlim(False)
+
     Public AniSpeed As Double = 1
     Public Class AniGroupEntry
         Public Data As List(Of AniData)
@@ -309,6 +316,10 @@ Public Module ModAnimation
             AniGroups.TryRemove(Name, Dummy)
         End If
         AniGroups(Name) = NewEntry
+
+        ' 叫醒空闲等待的动画线程，否则要等它下一次超时才动起来
+        AniLastTick = GetTimeMs()
+        AniWake.Set()
     End Sub
 
     Public Sub AniStart(AniGroup As AniData, Optional Name As String = "", Optional RefreshTime As Boolean = False)
@@ -334,12 +345,34 @@ Public Module ModAnimation
     Private AniCount As Integer = 0
 
     ''' <summary>
+    ''' 动画线程的停止标志。程序收尾时置位，让 AniStart() 的循环能结束。
+    ''' 原实现是 `Do While True` 且**没有任何退出路径**；配合当时 RunInNewThread
+    ''' 默认创建前台线程，会直接导致「托盘退出后进程残留」。
+    ''' </summary>
+    Private _AniStopping As Boolean = False
+
+    ''' <summary>请求动画线程退出（仅供程序收尾时调用）。</summary>
+    Public Sub AniStopAll()
+        _AniStopping = True
+        Try
+            AniWake.Set()   ' 立刻唤醒可能正在等动画的线程
+        Catch
+        End Try
+    End Sub
+
+    ''' <summary>
     ''' 启动动画计时器线程。
     ''' 该线程通过 RunInUiWait 将每帧回调 marshalling 到 UI 线程，
     ''' 因此 AniTimer 内部对 Entry.Data 的修改始终在 UI 线程上执行。
     ''' AniStart/AniStop 可从任意线程调用，仅操作 ConcurrentDictionary 层面。
+    '''
+    ''' 【轻量常驻】没有动画时线程**阻塞等待**，不再周期性空转。
+    ''' 旧实现无论有没有动画都每 16ms 醒一次（约 62 次/秒），
+    ''' 对一个长期驻留托盘的程序来说这是白白的 CPU 唤醒 ——
+    ''' 笔记本上直接体现为耗电。现在空闲时等事件，有动画时才逐帧跑。
     ''' </summary>
     Public Sub AniStart()
+        If AniRunning Then Return
         AniLastTick = GetTimeMs()
         AniRunning = True
 
@@ -347,25 +380,34 @@ Public Module ModAnimation
         Sub()
             Try
                 Log("[Animation] Animation thread started")
-                Do While True
+                Do While Not _AniStopping
+                    ' 空闲：睡到有动画被登记为止（AniStart(组) 会 Set 这个事件）
+                    If AniGroups.Count = 0 Then
+                        AniWake.Wait(1000)
+                        AniWake.Reset()
+                        AniLastTick = GetTimeMs()
+                        Continue Do
+                    End If
+
                     Dim DeltaTime As Long = (GetTimeMs() - AniLastTick).Clamp(0, 100000)
                     If DeltaTime < 3 Then
-                        Thread.Sleep(If(AniGroups.Count = 0, 16, 1))
+                        Thread.Sleep(1)
                         Continue Do
                     End If
                     AniLastTick = GetTimeMs()
-                    If AniGroups.Count > 0 Then
-                        RunInUiWait(
-                        Sub()
-                            AniCount = 0
-                            AniTimer(DeltaTime)
-                        End Sub)
-                    End If
+                    RunInUiWait(
+                    Sub()
+                        AniCount = 0
+                        AniTimer(DeltaTime)
+                    End Sub)
                 Loop
+                Log("[Animation] Animation thread stopped")
             Catch ex As Exception
                 Log(ex, "Animation frame failed")
+            Finally
+                AniRunning = False
             End Try
-        End Sub, "Animation", ThreadPriority.AboveNormal)
+        End Sub, "Animation", ThreadPriority.AboveNormal, IsBackground:=True)
     End Sub
 
     ''' <summary>

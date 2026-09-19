@@ -21,11 +21,11 @@
 
 | 状态页面                                   | 配置页面                                 |
 | ------------------------------------------ | ---------------------------------------- |
-| ![状态页面](screenshots/page-status.png) ) | ![配置页面](screenshots/page-config.png) |
+| ![状态页面](screenshots/page-status.png)  | ![配置页面](screenshots/page-config.png) |
 
 ## 下载
 
-前往 [Releases](https://github.com/angelica-bz/Ruijie-ePorta-Tool-WPF-/releases/latest) 下载最新版本。
+前往 [Releases](https://github.com/angelica-bz/Ruijie-ePorta-Tool---XHU/releases/latest) 下载最新版本。
 
 下载后直接运行 `Ruijie ePorta Tool.exe` 即可。
 
@@ -125,4 +125,4 @@ UI 使用了 [Plain Craft Launcher](https://github.com/Meloong-Git/PCL) 的部�
 
 ## 许可证
 
-本项目采用 [AGPL-3.0](https://chatgpt.com/c/LICENSE) 许可证。
+本项目采用 [AGPL-3.0](LICENSE) 许可证。

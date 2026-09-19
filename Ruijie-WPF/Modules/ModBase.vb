@@ -384,7 +384,19 @@ Public Module ModBase
         End If
     End Sub
 
-    Public Function RunInNewThread(Action As Action, Optional Name As String = Nothing, Optional Priority As ThreadPriority = ThreadPriority.Normal) As Thread
+    ''' <summary>
+    ''' 在后台线程上执行一段代码。
+    '''
+    ''' 【重要】IsBackground 默认 True。
+    ''' 原实现没有设置该属性，而 Thread 的默认值是 IsBackground=False ——
+    ''' 也就是**前台线程**。只要有一个前台线程还活着，CLR 就不会结束进程，
+    ''' 于是 Application.Shutdown() 之后进程会残留（实测托盘「退出」后
+    ''' Task Manager 里仍有进程，内存只剩约 20 MB，正是这个原因）。
+    ''' 本程序的线程都是辅助性的，绝不应该阻止进程退出，所以一律用后台线程。
+    ''' </summary>
+    Public Function RunInNewThread(Action As Action, Optional Name As String = Nothing,
+                                   Optional Priority As ThreadPriority = ThreadPriority.Normal,
+                                   Optional IsBackground As Boolean = True) As Thread
         Dim th As New Thread(
         Sub()
             Try
@@ -394,7 +406,11 @@ Public Module ModBase
             Catch ex As Exception
                 Log(ex, Name & ": thread execution failed")
             End Try
-        End Sub) With {.Name = If(Name, "Runtime New Invoke " & GetUuid() & "#"), .Priority = Priority}
+        End Sub) With {
+            .Name = If(Name, "Runtime New Invoke " & GetUuid() & "#"),
+            .Priority = Priority,
+            .IsBackground = IsBackground
+        }
         th.Start()
         Return th
     End Function
@@ -443,6 +459,27 @@ Public Module ModBase
             SyncLock LogLock
                 Debug.Write(AppendText)
             End SyncLock
+        Catch
+        End Try
+    End Sub
+
+    ''' <summary>
+    ''' 关键生命周期日志：**同时写 Debug 与每日日志文件**。
+    '''
+    ''' 与 Log() 的区别：Log() 走 Debug.Write，只有挂着调试器或是控制台重定向时
+    ''' 才看得到，生产环境下等于没有。而「进程退出时到底停在哪一步」这类问题
+    ''' 恰恰是事后才需要查的 —— 所以这类事件必须落盘。
+    '''
+    ''' 仅用于低频、诊断价值高的事件（线程启停、退出各阶段），不要滥用，
+    ''' 否则会把用户的日志刷满。
+    ''' </summary>
+    Public Sub TraceLifecycle(Text As String)
+        Try
+            Dim AppendText As String = $"[{GetTimeNow()}] {Text}{vbCrLf}"
+            SyncLock LogLock
+                Debug.Write(AppendText)
+            End SyncLock
+            DailyWrite(AppendText)
         Catch
         End Try
     End Sub

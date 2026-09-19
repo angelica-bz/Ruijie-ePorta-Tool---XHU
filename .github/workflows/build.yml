@@ -1,0 +1,86 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Test (${{ matrix.configuration }})
+    runs-on: windows-latest
+
+    strategy:
+      # 两种配置都要有结论，不要让其中一个失败掩盖另一个
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      # 刻意不做 NuGet 还原：
+      # 本解决方案**零 NuGet 依赖**，只引用 .NET Framework 4.8 框架程序集
+      # （见 Ruijie-WPF.vbproj 的 <Reference> 节点，无 PackageReference / packages.config）。
+      # 加 `nuget restore` 只会引入一个必然空转、且可能失败的步骤。
+
+      - name: Build
+        shell: pwsh
+        run: |
+          # Debug 与 Release 在 vbproj 里共用 bin\ 输出目录，直接连续构建会互相覆盖。
+          # 用 OutDir 把两种配置分到各自子目录，产物可分别归档、也便于各自跑测试。
+          msbuild Ruijie-WPF.sln `
+            /t:Rebuild `
+            /p:Configuration=${{ matrix.configuration }} `
+            /p:Platform="Any CPU" `
+            /p:OutDir="bin\${{ matrix.configuration }}\" `
+            /v:minimal /nologo
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "构建失败：${{ matrix.configuration }}"
+            exit 1
+          }
+
+      - name: Verify artifact exists
+        shell: pwsh
+        run: |
+          $exe = "Ruijie-WPF\bin\${{ matrix.configuration }}\Ruijie ePorta Tool.exe"
+          if (-not (Test-Path $exe)) {
+            Write-Error "未找到构建产物：$exe"
+            exit 1
+          }
+          Write-Host "构建产物：$exe"
+
+      # 质量门禁：离线测试套件，不访问网络、不读写用户配置、不写生产日志，退出码即结论
+      # （0 = 全部通过，1 = 存在失败，见 ModTestSuite / App.xaml.vb 的 --test 分支）。
+      #
+      # 刻意**不**在 CI 里跑 --diagnose 与 --preflight：
+      #   --diagnose 需要能访问校园门户并已保存配置，干净检出下退出码 2（配置未就绪）；
+      #   --preflight 要求配置可用且联网，干净检出下退出码 1（Ready = NO）。
+      # 两者都依赖用户本机配置与校园网环境，在 CI 中不具备稳定、明确的意义。
+      - name: Run offline tests
+        shell: pwsh
+        run: |
+          $exe = "Ruijie-WPF\bin\${{ matrix.configuration }}\Ruijie ePorta Tool.exe"
+          & $exe --test
+          $code = $LASTEXITCODE
+          Write-Host "--- --test 退出码：$code ---"
+          if ($code -ne 0) {
+            Write-Error "离线测试失败（${{ matrix.configuration }}，退出码 $code）"
+            exit $code
+          }
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ruijie-ePorta-Tool-${{ matrix.configuration }}
+          path: |
+            Ruijie-WPF/bin/${{ matrix.configuration }}/Ruijie ePorta Tool.exe
+            Ruijie-WPF/bin/${{ matrix.configuration }}/Ruijie ePorta Tool.pdb
+          if-no-files-found: error

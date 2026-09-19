@@ -169,6 +169,10 @@
     <Compile Include="Modules\Tests\ModTestFixtures.vb" />
     <Compile Include="Modules\Tests\ModTestFramework.vb" />
     <Compile Include="Modules\Tests\ModTestSuite.vb" />
+    <Compile Include="Modules\ModHost.vb" />
+    <Compile Include="Modules\ModSingleInstance.vb" />
+    <Compile Include="Modules\ModStartupIdentity.vb" />
+    <Compile Include="Modules\ModStartupProfile.vb" />
     <Compile Include="Modules\ModStartup.vb" />
     <Compile Include="Modules\VersionHelper.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />

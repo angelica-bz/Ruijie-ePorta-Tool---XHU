@@ -43,3 +43,11 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 .DS_Store
+
+# 开发期性能/诊断实验目录（脚本与原始数据，不入库）
+_perf/
+
+# 开发交接资料：保留在本地工作区供后续开发参考，不进入发布提交
+# （含本机绝对路径等个人环境信息，不适合作为发布产物）
+HANDOFF.md
+HANDOFF.*.md

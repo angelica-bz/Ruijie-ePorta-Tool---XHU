@@ -2,8 +2,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Ruijie"
-    xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    StartupUri="FormMain.xaml">
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+    <!-- 刻意不设 StartupUri：它会无条件 New FormMain() 并 Show()，
+         使后台启动也要解析整棵窗口 XAML、创建 HWND、初始化 WPF 渲染栈。
+         现改由 Application_Startup 决定本次是否需要主窗口（见 App.xaml.vb）。
+         注意：没有 StartupUri 后 MainWindow 保持 Nothing，
+         因此 ShutdownMode 必须显式设为 OnExplicitShutdown，否则托盘常驻会被
+         「最后一个窗口关闭」立刻结束进程。 -->
     <Application.Resources>
         <ResourceDictionary>
 

@@ -74,10 +74,29 @@ Public Class NetworkMonitor
             .Priority = ThreadPriority.BelowNormal
         }
         _Thread.Start()
+        Log("[Monitor] thread started")
     End Sub
 
+    ''' <summary>
+    ''' 请求停止，并**等待监控线程真正退出**。
+    ''' 原来只 Set 停止标志就返回，线程可能还卡在一次网络探测里（最长数秒）；
+    ''' 退出流程需要「停完再往下走」，否则会带着一个仍在运行的监控线程去 Shutdown。
+    ''' </summary>
     Public Sub [Stop]()
         _StopEvent.Set()
+        Dim Th = _Thread
+        If Th IsNot Nothing AndAlso Th.IsAlive Then
+            Try
+                If Th.Join(8000) Then
+                    Log("[Monitor] thread exit")
+                Else
+                    Log("[Monitor] stop timeout: thread still alive after 8s")
+                End If
+            Catch ex As Exception
+                Log(ex, "[Monitor] join failed")
+            End Try
+        End If
+        _Thread = Nothing
     End Sub
 
     Private Sub RunLoop()
